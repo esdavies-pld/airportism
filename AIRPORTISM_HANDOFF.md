@@ -21,7 +21,7 @@ This document is the complete spec. Build it end to end.
 
 ## 2. Tech stack
 
-- **Frontend:** Next.js 15 (App Router), TypeScript, React 19, Tailwind CSS
+- **Frontend:** Next.js 16 (App Router, Turbopack default), TypeScript, React 19, Tailwind CSS v4 (PostCSS plugin, no `tailwind.config.ts`)
 - **Map:** MapLibre GL JS v5+ with globe projection, Esri World Imagery raster tiles
 - **Backend:** Next.js route handlers (no separate server)
 - **Database:** Postgres (use Neon or Supabase for hosting; local Postgres via Docker for dev)
@@ -73,7 +73,8 @@ airportism/
 ├── package.json
 ├── drizzle.config.ts
 ├── next.config.ts
-├── tailwind.config.ts
+├── postcss.config.mjs            # Tailwind v4 via @tailwindcss/postcss
+├── eslint.config.mjs
 └── README.md
 ```
 

@@ -12,7 +12,7 @@ There are no hints, no skips, and one guess per question.
 
 ## Stack
 
-- **Next.js 15** (App Router) + TypeScript + React 19
+- **Next.js 16** (App Router) + TypeScript + React 19
 - **MapLibre GL JS** v5 with globe projection
 - **Esri World Imagery** satellite tiles
 - **Postgres** + **Drizzle** ORM

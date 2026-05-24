@@ -10,7 +10,7 @@ The full product spec lives in `AIRPORTISM_HANDOFF.md`. Read it before making no
 
 ## Tech stack
 
-- Next.js 15 (App Router) + TypeScript + React 19
+- Next.js 16 (App Router) + TypeScript + React 19
 - MapLibre GL JS v5 with globe projection
 - Esri World Imagery raster tiles
 - Postgres + Drizzle ORM
