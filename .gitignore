@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# downloaded source data (re-fetch from OurAirports, see README)
+/data/airports.csv
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
