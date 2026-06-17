@@ -177,7 +177,7 @@ The script reads `data/tier1.json` and `data/tier2.json`, updates the `tier` col
 
 1. Generate rounds for the next **90 days** starting from tomorrow's UTC date.
 2. For each day, draw airports with this distribution: tier 1, tier 2, tier 3 — in that order.
-3. Enforce a 90-day cooldown: an IATA code cannot reappear within 90 days of its last use. With a 90-day v1 horizon, this means no IATA appears more than once across the whole horizon.
+3. Enforce a per-tier cooldown of `min(90, pool_size − 1)` days — an airport cannot reappear within that many days of its last use. With US-only pools (T1 ≈ 42, T2 ≈ 61, T3 ≈ 530+) this resolves to T1=41 days, T2=60 days, T3=90 days. Across the 90-day horizon: a T1 airport appears up to ~3 times (gap ≥ 42 days), a T2 up to ~2 times (gap ≥ 61 days), a T3 at most once. The original strict-90-day cooldown is mathematically impossible for T1/T2 at current pool sizes; revisit if the seed lists expand.
 4. Seed the random selection with an inline xorshift PRNG keyed on `playDate` so the script is reproducible (no external RNG dependency).
 5. Upsert into `daily_rounds` using `playDate` as conflict key.
 
