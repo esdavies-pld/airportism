@@ -6,6 +6,7 @@ import { getPlayerId } from '@/lib/player-client';
 import type { PinCoord } from './Globe';
 import Question from './Question';
 import ResultCard from './ResultCard';
+import RoundSummary from './RoundSummary';
 
 const Globe = dynamic(() => import('./Globe'), { ssr: false });
 
@@ -164,16 +165,11 @@ export default function GameShell() {
   if (phase === 'complete') {
     const total = round.totalScore ?? reveals.reduce((s, r) => s + r.score, 0);
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-2 bg-black p-8 text-white">
-        <div className="text-xl text-gray-400">Round complete</div>
-        <div className="font-mono text-6xl font-bold text-orange-500">
-          {total.toLocaleString()}
-        </div>
-        <div className="text-sm text-gray-500">of 15,000</div>
-        <div className="mt-8 text-xs text-gray-600">
-          (RoundSummary + share is step 10. /complete persistence is step 11.)
-        </div>
-      </div>
+      <RoundSummary
+        playDate={round.playDate}
+        totalScore={total}
+        scores={reveals.map((r) => r.score)}
+      />
     );
   }
 
