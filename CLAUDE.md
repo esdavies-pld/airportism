@@ -108,7 +108,7 @@ Stop and ask before:
 
 We don't have a heavy test suite. What we do have:
 
-- Unit tests for `lib/scoring.ts` — distance and score values are easy to regression-test against known pairs (JFK↔LAX ≈ 3974 km, JFK↔BOS ≈ 305 km).
+- Unit tests for `lib/scoring.ts` — distance and score values are easy to regression-test against known pairs (JFK↔LAX ≈ 3974 km, JFK↔BOS ≈ 300 km).
 - Integration tests for the API endpoints using `vitest` and a test database. Run with `pnpm test`.
 - No component or E2E tests in v1.
 

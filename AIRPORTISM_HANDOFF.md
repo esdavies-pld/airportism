@@ -212,7 +212,7 @@ export function scoreForDistance(distanceKm: number): number {
 }
 ```
 
-Reference values: 0 km → 5000, 50 km → 4677, 100 km → 4376, 250 km → 3589, 500 km → 2566, 1000 km → 1316, 2000 km → 346, 5000 km → 6.
+Reference values (computed from the formula above, locked in by `lib/scoring.test.ts`): 0 km → 5000, 50 km → 4678, 100 km → 4376, 250 km → 3583, 500 km → 2567, 1000 km → 1318, 2000 km → 347, 5000 km → 6.
 
 Max possible round total: **15,000** (3 questions × 5,000).
 
