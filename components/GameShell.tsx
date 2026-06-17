@@ -133,10 +133,30 @@ export default function GameShell() {
     }
   };
 
+  const completeRound = async () => {
+    try {
+      const res = await fetch('/api/round/today/complete', {
+        method: 'POST',
+        headers: {
+          'X-Player-Id': getPlayerId(),
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { totalScore: number };
+      setRound((prev) => (prev ? { ...prev, totalScore: data.totalScore } : prev));
+    } catch {
+      // Best-effort: local sum still displays. Stats endpoint will reflect
+      // missing rows; player can refresh /play to retry the POST.
+    }
+  };
+
   const advance = () => {
     if (!round) return;
     if (currentIdx >= round.questions.length - 1) {
       setPhase('complete');
+      void completeRound();
       return;
     }
     setCurrentIdx(currentIdx + 1);
