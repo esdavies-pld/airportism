@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dig *)",
+      "mcp__render__list_logs",
+      "mcp__render__list_deploys"
+    ]
+  }
+}
