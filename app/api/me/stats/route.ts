@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db/client';
 import { dailyResults } from '@/lib/db/schema';
 import { ensurePlayer, isValidPlayerId } from '@/lib/player';
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
   const results = await db
     .select({ playDate: dailyResults.playDate, totalScore: dailyResults.totalScore })
     .from(dailyResults)
-    .where(eq(dailyResults.playerId, playerId))
+    .where(and(eq(dailyResults.playerId, playerId), eq(dailyResults.flagged, false)))
     .orderBy(desc(dailyResults.playDate));
 
   if (results.length === 0) {

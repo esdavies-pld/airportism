@@ -310,8 +310,8 @@ Light touch, intentionally minimal:
 
 1. The full answer set per day is 3 airports out of ~500–700. A determined scraper will get it, so don't over-engineer.
 2. The `/round/today` endpoint never returns coordinates. Reveal happens only after `POST /guess`.
-3. Validate `elapsedMs > 250` per guess server-side. If lower, accept the guess but flag the result via a `flagged` boolean on `daily_results` (column added in step 14). Flagged results are excluded from any future aggregate stats.
-4. Rate limit `/guess` to 10 requests per minute per player UUID using Upstash Redis or Vercel KV.
+3. Validate `elapsedMs > 250` per guess server-side. If lower, accept the guess but flag the round via a `flagged` boolean on `daily_results` (set at `/complete` time based on `MIN(elapsed_ms)` across the player's three guesses). Flagged results are excluded from `/api/me/stats` aggregates (gamesPlayed, streak, avg, best, distribution).
+4. Rate limit `/guess` to 10 requests per minute per player UUID via Upstash Redis (`@upstash/ratelimit` sliding window). 429 response carries a `Retry-After` header.
 
 ---
 

@@ -68,6 +68,7 @@ export const dailyResults = pgTable(
     playDate: date('play_date').notNull(),
     totalScore: integer('total_score').notNull(),
     completedAt: timestamp('completed_at').notNull().defaultNow(),
+    flagged: boolean('flagged').notNull().default(false),
   },
   (t) => [primaryKey({ columns: [t.playerId, t.playDate] })],
 );

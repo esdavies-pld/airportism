@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db/client';
 import { dailyResults, guesses } from '@/lib/db/schema';
 import { ensurePlayer, isValidPlayerId } from '@/lib/player';
 import { currentPlayDate } from '@/lib/date';
+import { MIN_ELAPSED_MS } from '@/lib/ratelimit';
 
 const EXPECTED_GUESSES = 3;
 
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
     .select({
       count: sql<number>`count(*)::int`,
       total: sql<number>`coalesce(sum(score), 0)::int`,
+      minElapsed: sql<number>`coalesce(min(elapsed_ms), 0)::int`,
     })
     .from(guesses)
     .where(and(eq(guesses.playerId, playerId), eq(guesses.playDate, playDate)));
@@ -40,13 +42,17 @@ export async function POST(req: Request) {
   }
 
   const totalScore = agg.total;
+  const flagged = agg.minElapsed < MIN_ELAPSED_MS;
 
   await db
     .insert(dailyResults)
-    .values({ playerId, playDate, totalScore })
+    .values({ playerId, playDate, totalScore, flagged })
     .onConflictDoUpdate({
       target: [dailyResults.playerId, dailyResults.playDate],
-      set: { totalScore: sql`excluded.total_score` },
+      set: {
+        totalScore: sql`excluded.total_score`,
+        flagged: sql`excluded.flagged`,
+      },
     });
 
   return NextResponse.json({ totalScore });
