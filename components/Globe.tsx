@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import maplibregl, { type StyleSpecification } from 'maplibre-gl';
+import { feature as topoFeature } from 'topojson-client';
+import type { Topology } from 'topojson-specification';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export interface PinCoord {
@@ -40,6 +42,57 @@ const STYLE: StyleSpecification = {
 
 const GREAT_CIRCLE_SRC = 'great-circle';
 const GREAT_CIRCLE_LAYER = 'great-circle-line';
+const COUNTRIES_SRC = 'countries';
+const COUNTRIES_LAYER = 'countries-line';
+const US_STATES_SRC = 'us-states';
+const US_STATES_LAYER = 'us-states-line';
+const COUNTRIES_URL = '/borders/world-countries-50m.json';
+const US_STATES_URL = '/borders/us-states-10m.json';
+
+async function loadBorders(map: maplibregl.Map) {
+  const [world, us] = await Promise.all([
+    fetch(COUNTRIES_URL).then((r) => r.json() as Promise<Topology>),
+    fetch(US_STATES_URL).then((r) => r.json() as Promise<Topology>),
+  ]);
+
+  if (!map.getStyle()) return; // map was removed mid-fetch
+
+  if (!map.getSource(COUNTRIES_SRC)) {
+    const countries = topoFeature(world, world.objects.countries) as unknown as GeoJSON.FeatureCollection;
+    map.addSource(COUNTRIES_SRC, { type: 'geojson', data: countries });
+    map.addLayer(
+      {
+        id: COUNTRIES_LAYER,
+        type: 'line',
+        source: COUNTRIES_SRC,
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 0.6,
+          'line-opacity': 0.45,
+        },
+      },
+      map.getLayer(GREAT_CIRCLE_LAYER) ? GREAT_CIRCLE_LAYER : undefined,
+    );
+  }
+
+  if (!map.getSource(US_STATES_SRC)) {
+    const states = topoFeature(us, us.objects.states) as unknown as GeoJSON.FeatureCollection;
+    map.addSource(US_STATES_SRC, { type: 'geojson', data: states });
+    map.addLayer(
+      {
+        id: US_STATES_LAYER,
+        type: 'line',
+        source: US_STATES_SRC,
+        paint: {
+          'line-color': '#fbbf24',
+          'line-width': 0.5,
+          'line-opacity': 0.55,
+        },
+      },
+      map.getLayer(GREAT_CIRCLE_LAYER) ? GREAT_CIRCLE_LAYER : undefined,
+    );
+  }
+}
 
 function interpolateGreatCircle(a: PinCoord, b: PinCoord, steps = 64): [number, number][] {
   const lat1 = (a.lat * Math.PI) / 180;
@@ -114,17 +167,21 @@ export default function Globe({ pin = null, onPinChange, locked = false, reveal 
 
     map.on('load', () => {
       setLoaded(true);
-      if (map.getSource(GREAT_CIRCLE_SRC)) return;
-      map.addSource(GREAT_CIRCLE_SRC, { type: 'geojson', data: emptyLine() });
-      map.addLayer({
-        id: GREAT_CIRCLE_LAYER,
-        type: 'line',
-        source: GREAT_CIRCLE_SRC,
-        paint: {
-          'line-color': '#f97316',
-          'line-width': 2,
-          'line-dasharray': [2, 2],
-        },
+      if (!map.getSource(GREAT_CIRCLE_SRC)) {
+        map.addSource(GREAT_CIRCLE_SRC, { type: 'geojson', data: emptyLine() });
+        map.addLayer({
+          id: GREAT_CIRCLE_LAYER,
+          type: 'line',
+          source: GREAT_CIRCLE_SRC,
+          paint: {
+            'line-color': '#f97316',
+            'line-width': 2,
+            'line-dasharray': [2, 2],
+          },
+        });
+      }
+      void loadBorders(map).catch((err) => {
+        console.error('Failed to load border data', err);
       });
     });
 
