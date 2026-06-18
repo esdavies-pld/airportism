@@ -51,7 +51,7 @@ export const guesses = pgTable(
     iata: char('iata', { length: 3 }).notNull(),
     lat: doublePrecision('lat').notNull(),
     lon: doublePrecision('lon').notNull(),
-    distanceKm: doublePrecision('distance_km').notNull(),
+    distanceMi: doublePrecision('distance_mi').notNull(),
     score: integer('score').notNull(),
     elapsedMs: integer('elapsed_ms').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),

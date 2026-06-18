@@ -11,15 +11,15 @@ interface RevealActual {
 interface ResultCardProps {
   reveal: {
     score: number;
-    distanceKm: number;
+    distanceMi: number;
     actual: RevealActual;
   };
   onNext: () => void;
   isLast: boolean;
 }
 
-function formatKm(km: number): string {
-  return `${Math.round(km).toLocaleString()} km`;
+function formatMiles(mi: number): string {
+  return `${Math.round(mi).toLocaleString()} mi`;
 }
 
 const COUNT_UP_MS = 800;
@@ -50,7 +50,7 @@ export default function ResultCard({ reveal, onNext, isLast }: ResultCardProps) 
         <div className="font-mono text-4xl font-bold tabular-nums text-orange-500">
           {animatedScore.toLocaleString()}
         </div>
-        <div className="font-mono text-sm text-gray-400">{formatKm(reveal.distanceKm)}</div>
+        <div className="font-mono text-sm text-gray-400">{formatMiles(reveal.distanceMi)}</div>
       </div>
       <div className="mt-3 text-sm">
         <div className="font-semibold">{reveal.actual.name}</div>

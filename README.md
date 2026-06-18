@@ -75,18 +75,18 @@ drizzle/         Migrations
 ## Scoring
 
 ```
-score = round(5000 * exp(-distance_km / 750))
+score = round(5000 * exp(-distance_mi / 750))
 ```
 
 | Distance | Score |
 |----------|-------|
-| 0 km     | 5000  |
-| 50 km    | 4678  |
-| 250 km   | 3583  |
-| 500 km   | 2567  |
-| 1000 km  | 1318  |
-| 2000 km  | 347   |
-| 5000 km  | 6     |
+| 0 mi     | 5000  |
+| 50 mi    | 4678  |
+| 250 mi   | 3583  |
+| 500 mi   | 2567  |
+| 1000 mi  | 1318  |
+| 2000 mi  | 347   |
+| 5000 mi  | 6     |
 
 ## API
 

@@ -24,7 +24,7 @@ export default function HowItWorks() {
       <section className="mt-8 space-y-3">
         <h2 className="text-xl font-bold text-orange-500">Scoring</h2>
         <pre className="rounded bg-zinc-900 p-3 font-mono text-sm text-gray-300">
-          score = round(5000 × exp(−distance_km / 750))
+          score = round(5000 × exp(−distance_mi / 750))
         </pre>
         <p className="text-gray-300">Max 5,000 points per question, 15,000 per round.</p>
         <table className="mt-2 w-full max-w-sm text-sm">
@@ -35,13 +35,13 @@ export default function HowItWorks() {
             </tr>
           </thead>
           <tbody className="font-mono text-gray-300">
-            <tr><td className="py-0.5">0 km</td><td>5,000</td></tr>
-            <tr><td className="py-0.5">50 km</td><td>4,678</td></tr>
-            <tr><td className="py-0.5">250 km</td><td>3,583</td></tr>
-            <tr><td className="py-0.5">500 km</td><td>2,567</td></tr>
-            <tr><td className="py-0.5">1,000 km</td><td>1,318</td></tr>
-            <tr><td className="py-0.5">2,000 km</td><td>347</td></tr>
-            <tr><td className="py-0.5">5,000 km</td><td>6</td></tr>
+            <tr><td className="py-0.5">0 mi</td><td>5,000</td></tr>
+            <tr><td className="py-0.5">50 mi</td><td>4,678</td></tr>
+            <tr><td className="py-0.5">250 mi</td><td>3,583</td></tr>
+            <tr><td className="py-0.5">500 mi</td><td>2,567</td></tr>
+            <tr><td className="py-0.5">1,000 mi</td><td>1,318</td></tr>
+            <tr><td className="py-0.5">2,000 mi</td><td>347</td></tr>
+            <tr><td className="py-0.5">5,000 mi</td><td>6</td></tr>
           </tbody>
         </table>
       </section>

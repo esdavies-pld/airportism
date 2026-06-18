@@ -24,7 +24,7 @@ interface RoundData {
 
 interface GuessResult {
   score: number;
-  distanceKm: number;
+  distanceMi: number;
   actual: {
     lat: number;
     lon: number;

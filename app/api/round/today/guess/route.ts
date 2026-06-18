@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db/client';
 import { airports, dailyRounds, guesses } from '@/lib/db/schema';
 import { ensurePlayer, isValidPlayerId } from '@/lib/player';
-import { haversineKm, scoreForDistance } from '@/lib/scoring';
+import { haversineMiles, scoreForDistance } from '@/lib/scoring';
 import { currentPlayDate } from '@/lib/date';
 import { guessBodySchema } from './schema';
 
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
   };
 
   const [existing] = await db
-    .select({ score: guesses.score, distanceKm: guesses.distanceKm })
+    .select({ score: guesses.score, distanceMi: guesses.distanceMi })
     .from(guesses)
     .where(
       and(
@@ -93,16 +93,16 @@ export async function POST(req: Request) {
   if (existing) {
     return NextResponse.json({
       score: existing.score,
-      distanceKm: existing.distanceKm,
+      distanceMi: existing.distanceMi,
       actual: reveal,
     });
   }
 
-  const distanceKm = haversineKm(
+  const distanceMi = haversineMiles(
     { lat: parsed.data.lat, lon: parsed.data.lon },
     { lat: airport.lat, lon: airport.lon },
   );
-  const score = scoreForDistance(distanceKm);
+  const score = scoreForDistance(distanceMi);
 
   await db.insert(guesses).values({
     playerId,
@@ -111,10 +111,10 @@ export async function POST(req: Request) {
     iata,
     lat: parsed.data.lat,
     lon: parsed.data.lon,
-    distanceKm,
+    distanceMi,
     score,
     elapsedMs: parsed.data.elapsedMs,
   });
 
-  return NextResponse.json({ score, distanceKm, actual: reveal });
+  return NextResponse.json({ score, distanceMi, actual: reveal });
 }

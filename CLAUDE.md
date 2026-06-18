@@ -70,10 +70,10 @@ If a feature seems to require accounts, push back before building it.
 The scoring formula lives in `lib/scoring.ts` and is:
 
 ```
-score = round(5000 * exp(-distance_km / 750))
+score = round(5000 * exp(-distance_mi / 750))
 ```
 
-Do not modify `SCALE_KM` (currently 750) or `MAX_SCORE` (5000) without flagging it — those values shape the entire leaderboard distribution and changing them invalidates historical comparisons.
+Do not modify `SCALE_MI` (currently 750) or `MAX_SCORE` (5000) without flagging it — those values shape the leaderboard distribution and changing them invalidates historical comparisons. v1 uses miles; we converted from km on 2026-06-17 keeping the constants numerically the same, which made the curve more lenient (a 500 mi guess scores like the old 500 km guess).
 
 Scoring happens **server-side only**. The client never computes a score for display before the server returns it. If you need to show a "calculating..." state, use a loading spinner.
 
@@ -108,7 +108,7 @@ Stop and ask before:
 
 We don't have a heavy test suite. What we do have:
 
-- Unit tests for `lib/scoring.ts` — distance and score values are easy to regression-test against known pairs (JFK↔LAX ≈ 3974 km, JFK↔BOS ≈ 300 km).
+- Unit tests for `lib/scoring.ts` — distance and score values are easy to regression-test against known pairs (JFK↔LAX ≈ 2470 mi, JFK↔BOS ≈ 186 mi).
 - Integration tests for the API endpoints using `vitest` and a test database. Run with `pnpm test`.
 - No component or E2E tests in v1.
 

@@ -121,7 +121,7 @@ export const guesses = pgTable('guesses', {
   iata: char('iata', { length: 3 }).notNull(),
   lat: doublePrecision('lat').notNull(),
   lon: doublePrecision('lon').notNull(),
-  distanceKm: doublePrecision('distance_km').notNull(),
+  distanceMi: doublePrecision('distance_mi').notNull(),
   score: integer('score').notNull(),
   elapsedMs: integer('elapsed_ms').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -192,27 +192,27 @@ Run this once after ingestion, and re-run anytime the tier lists or the airport 
 `lib/scoring.ts`:
 
 ```ts
-const EARTH_KM = 6371;
+const EARTH_MI = 3959;
 
-export function haversineKm(a: {lat: number, lon: number}, b: {lat: number, lon: number}) {
+export function haversineMiles(a: {lat: number, lon: number}, b: {lat: number, lon: number}) {
   const toRad = (d: number) => d * Math.PI / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLon = toRad(b.lon - a.lon);
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
   const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-  return 2 * EARTH_KM * Math.asin(Math.sqrt(h));
+  return 2 * EARTH_MI * Math.asin(Math.sqrt(h));
 }
 
-const SCALE_KM = 750;
+const SCALE_MI = 750;
 const MAX_SCORE = 5000;
 
-export function scoreForDistance(distanceKm: number): number {
-  return Math.round(MAX_SCORE * Math.exp(-distanceKm / SCALE_KM));
+export function scoreForDistance(distanceMiles: number): number {
+  return Math.round(MAX_SCORE * Math.exp(-distanceMiles / SCALE_MI));
 }
 ```
 
-Reference values (computed from the formula above, locked in by `lib/scoring.test.ts`): 0 km → 5000, 50 km → 4678, 100 km → 4376, 250 km → 3583, 500 km → 2567, 1000 km → 1318, 2000 km → 347, 5000 km → 6.
+Reference values (computed from the formula above, locked in by `lib/scoring.test.ts`): 0 mi → 5000, 50 mi → 4678, 100 mi → 4376, 250 mi → 3583, 500 mi → 2567, 1000 mi → 1318, 2000 mi → 347, 5000 mi → 6.
 
 Max possible round total: **15,000** (3 questions × 5,000).
 
@@ -248,14 +248,14 @@ Body: `{ questionIndex: number, lat: number, lon: number, elapsedMs: number }`
 Server:
 1. Validates `questionIndex` is 0–2 and the player hasn't already submitted for this index today (idempotent: return the existing record if so).
 2. Looks up the airport's true coordinates from `airports`.
-3. Computes `distanceKm` and `score`.
+3. Computes `distanceMi` and `score`.
 4. Inserts into `guesses`.
 5. Returns:
 
 ```json
 {
   "score": 4283,
-  "distanceKm": 142.7,
+  "distanceMi": 88.7,
   "actual": {
     "lat": 40.6413,
     "lon": -73.7781,
@@ -427,7 +427,7 @@ Build in this order. Don't skip ahead.
 3. **Ingestion.** Download CSV, write and run `ingest-airports.ts`. Verify ~500–700 US airports in DB.
 4. **Tiering.** Create `data/tier1.json` and `data/tier2.json` from the seed lists in this doc. Write and run `tier-airports.ts`. Verify tier counts: T1 ~40, T2 ~60, T3 ~400+.
 5. **Round generation.** Write and run `generate-rounds.ts` for 90 days. Spot check that no IATA appears more than once across the horizon.
-6. **Scoring lib + unit tests.** Verify haversine against known distances (JFK↔LAX ≈ 3974 km, JFK↔BOS ≈ 305 km).
+6. **Scoring lib + unit tests.** Verify haversine against known distances (JFK↔LAX ≈ 2470 mi, JFK↔BOS ≈ 186 mi).
 7. **API: `/round/today` and `/guess`.** Build and test with `curl`. Make sure `/round/today` never includes coordinates.
 8. **Globe component.** Standalone test page first — render the globe, accept a click, drop a draggable pin.
 9. **Game shell wiring.** Hook globe to API. Play through one full round in dev.
