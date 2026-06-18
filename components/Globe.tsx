@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl, { type StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -86,6 +86,7 @@ export default function Globe({ pin = null, onPinChange, locked = false, reveal 
   const actualMarkerRef = useRef<maplibregl.Marker | null>(null);
   const onPinChangeRef = useRef(onPinChange);
   const lockedRef = useRef(locked);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     onPinChangeRef.current = onPinChange;
@@ -112,6 +113,7 @@ export default function Globe({ pin = null, onPinChange, locked = false, reveal 
     });
 
     map.on('load', () => {
+      setLoaded(true);
       if (map.getSource(GREAT_CIRCLE_SRC)) return;
       map.addSource(GREAT_CIRCLE_SRC, { type: 'geojson', data: emptyLine() });
       map.addLayer({
@@ -201,5 +203,14 @@ export default function Globe({ pin = null, onPinChange, locked = false, reveal 
     }
   }, [reveal]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      {!loaded && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/80 text-sm uppercase tracking-widest text-gray-400">
+          Loading globe…
+        </div>
+      )}
+    </div>
+  );
 }

@@ -74,8 +74,10 @@ export default function GameShell() {
     fetch('/api/round/today', { headers: { 'X-Player-Id': playerId } })
       .then(async (res) => {
         if (!res.ok) {
-          const body = (await res.json().catch(() => ({}))) as { error?: string };
-          throw new Error(body.error ?? `HTTP ${res.status}`);
+          const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+          const err = new Error(body.error ?? `HTTP ${res.status}`);
+          (err as Error & { code?: string }).code = body.code;
+          throw err;
         }
         return (await res.json()) as RoundData;
       })
@@ -96,7 +98,9 @@ export default function GameShell() {
         setQuestionStart(Date.now());
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        const code = err instanceof Error ? (err as Error & { code?: string }).code : undefined;
+        setError(code === 'no_round' ? "Today's round isn't ready yet. Check back at 00:00 UTC-5." : message);
         setPhase('error');
       });
   }, []);
@@ -173,11 +177,16 @@ export default function GameShell() {
 
   if (phase === 'error' || !round) {
     return (
-      <div className="flex h-screen items-center justify-center bg-black p-8 text-center text-white">
-        <div>
-          <div className="text-lg font-semibold text-red-400">Error</div>
-          <div className="mt-2 text-sm text-gray-400">{error ?? 'Unknown error'}</div>
-        </div>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-black p-8 text-center text-white">
+        <div className="font-mono text-2xl font-bold text-orange-500">AIRPORTISM</div>
+        <p className="max-w-sm text-sm text-gray-400">{error ?? 'Something went wrong.'}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="rounded-full bg-orange-500 px-8 py-2 text-sm font-bold text-black hover:bg-orange-400"
+        >
+          Try again
+        </button>
       </div>
     );
   }

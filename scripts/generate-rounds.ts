@@ -4,6 +4,7 @@ dotenv.config({ path: '.env.local' });
 import { eq, gte } from 'drizzle-orm';
 import { getDb } from '../lib/db/client';
 import { airports, dailyRounds } from '../lib/db/schema';
+import { currentPlayDate } from '../lib/date';
 
 const HORIZON_DAYS = 90;
 const MAX_COOLDOWN = 90;
@@ -64,8 +65,10 @@ async function main() {
   console.log(`Pools: T1=${byTier[1].length}, T2=${byTier[2].length}, T3=${byTier[3].length}`);
   console.log(`Cooldowns (days): T1=${cooldown[1]}, T2=${cooldown[2]}, T3=${cooldown[3]}`);
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  // Anchor on UTC-5 midnight (= UTC 05:00) of today's play date so the script
+  // and the API agree on what calendar date a row is for. (Bug fix: previously
+  // used UTC midnight, which disagreed with the API during 00:00–05:00 UTC.)
+  const today = new Date(`${currentPlayDate()}T05:00:00Z`);
 
   const targetDates: string[] = [];
   for (let i = 1; i <= HORIZON_DAYS; i++) {
