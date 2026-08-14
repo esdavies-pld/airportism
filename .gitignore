@@ -37,6 +37,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# agent skills installed by Vercel Marketplace integrations (Neon, Upstash)
+/.agents/
+/.claude/skills/
+/skills-lock.json
+
 # downloaded source data (re-fetch from OurAirports, see README)
 /data/airports.csv
 
