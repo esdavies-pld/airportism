@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import maplibregl, { type StyleSpecification } from 'maplibre-gl';
-import { feature as topoFeature } from 'topojson-client';
+import { mesh as topoMesh } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -49,6 +49,40 @@ const US_STATES_LAYER = 'us-states-line';
 const COUNTRIES_URL = '/borders/world-countries-50m.json';
 const US_STATES_URL = '/borders/us-states-10m.json';
 
+// Natural Earth geometry crosses the antimeridian, and MapLibre draws each
+// segment planar-wise — so a hop from +179 to -179 is rendered the long way,
+// as a line clear around the globe. Fiji (lat -16.4), Russia and Antarctica
+// all do it. Cut those segments; the gap left at ±180 is sub-pixel.
+function splitAtAntimeridian(lines: GeoJSON.Position[][]): GeoJSON.Position[][] {
+  const out: GeoJSON.Position[][] = [];
+  for (const line of lines) {
+    let run: GeoJSON.Position[] = [];
+    for (let i = 0; i < line.length; i++) {
+      if (i > 0 && Math.abs(line[i][0] - line[i - 1][0]) > 180) {
+        if (run.length > 1) out.push(run);
+        run = [];
+      }
+      run.push(line[i]);
+    }
+    if (run.length > 1) out.push(run);
+  }
+  return out;
+}
+
+// mesh() yields the shared arcs, so a border between two countries is drawn
+// once rather than once per polygon — keeps every line the same weight.
+function borderLines(topo: Topology, key: string): GeoJSON.Feature {
+  const merged = topoMesh(topo, topo.objects[key] as unknown as Parameters<typeof topoMesh>[1]);
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiLineString',
+      coordinates: splitAtAntimeridian(merged.coordinates),
+    },
+  };
+}
+
 async function loadBorders(map: maplibregl.Map) {
   const [world, us] = await Promise.all([
     fetch(COUNTRIES_URL).then((r) => r.json() as Promise<Topology>),
@@ -58,8 +92,7 @@ async function loadBorders(map: maplibregl.Map) {
   if (!map.getStyle()) return; // map was removed mid-fetch
 
   if (!map.getSource(COUNTRIES_SRC)) {
-    const countries = topoFeature(world, world.objects.countries) as unknown as GeoJSON.FeatureCollection;
-    map.addSource(COUNTRIES_SRC, { type: 'geojson', data: countries });
+    map.addSource(COUNTRIES_SRC, { type: 'geojson', data: borderLines(world, 'countries') });
     map.addLayer(
       {
         id: COUNTRIES_LAYER,
@@ -76,8 +109,7 @@ async function loadBorders(map: maplibregl.Map) {
   }
 
   if (!map.getSource(US_STATES_SRC)) {
-    const states = topoFeature(us, us.objects.states) as unknown as GeoJSON.FeatureCollection;
-    map.addSource(US_STATES_SRC, { type: 'geojson', data: states });
+    map.addSource(US_STATES_SRC, { type: 'geojson', data: borderLines(us, 'states') });
     map.addLayer(
       {
         id: US_STATES_LAYER,
