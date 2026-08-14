@@ -70,8 +70,11 @@ async function main() {
   // used UTC midnight, which disagreed with the API during 00:00–05:00 UTC.)
   const today = new Date(`${currentPlayDate()}T05:00:00Z`);
 
+  // Start at today, not tomorrow: on a fresh database there is no round for the
+  // current play date, and skipping it leaves the site unplayable until midnight.
+  // Existing dates are skipped below, so re-runs still only fill gaps.
   const targetDates: string[] = [];
-  for (let i = 1; i <= HORIZON_DAYS; i++) {
+  for (let i = 0; i < HORIZON_DAYS; i++) {
     targetDates.push(utcDateString(addDays(today, i)));
   }
 
