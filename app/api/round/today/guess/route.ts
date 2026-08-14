@@ -5,7 +5,7 @@ import { airports, dailyRounds, guesses } from '@/lib/db/schema';
 import { ensurePlayer, isValidPlayerId } from '@/lib/player';
 import { haversineMiles, scoreForDistance } from '@/lib/scoring';
 import { currentPlayDate } from '@/lib/date';
-import { getGuessRateLimit } from '@/lib/ratelimit';
+import { checkGuessRateLimit } from '@/lib/ratelimit';
 import { guessBodySchema } from './schema';
 
 export async function POST(req: Request) {
@@ -17,12 +17,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const rl = await getGuessRateLimit().limit(playerId);
-  if (!rl.success) {
-    const retrySeconds = Math.max(1, Math.ceil((rl.reset - Date.now()) / 1000));
+  const rl = await checkGuessRateLimit(playerId);
+  if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Rate limit exceeded — slow down', code: 'rate_limited' },
-      { status: 429, headers: { 'Retry-After': String(retrySeconds) } },
+      { status: 429, headers: { 'Retry-After': String(rl.retrySeconds) } },
     );
   }
 
